@@ -381,7 +381,7 @@ ul {
 
 /* Schedule CTA */
 .schedule {
-    background: linear-gradient(rgba(18,18,18,0.92), rgba(18,18,18,0.92)), url('https://images.unsplash.com/photo-1599351431202-1e0f0137899a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover fixed;
+    background: linear-gradient(rgba(18,18,18,0.92), rgba(18,18,18,0.92)), url('https://images.unsplash.com/photo-1599351431202-1e0f0137899a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
 }
 
 .cta-box {
@@ -497,6 +497,7 @@ ul {
     z-index: 999;
     animation: bounce 2s infinite ease-in-out;
     transition: all 0.3s ease;
+    will-change: transform;
 }
 
 .floating-btn:hover {
