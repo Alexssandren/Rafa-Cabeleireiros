@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" fill="none" stroke="#d4af37" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <style>
+        .top-blade { transform-origin: 50% 50%; animation: snip-top 2s infinite ease-in-out; }
+        .bot-blade { transform-origin: 50% 50%; animation: snip-bot 2s infinite ease-in-out; }
+        @keyframes snip-top { 0%, 100% { transform: rotate(0deg); } 15%, 35% { transform: rotate(20deg); } 25%, 45% { transform: rotate(0deg); } }
+        @keyframes snip-bot { 0%, 100% { transform: rotate(0deg); } 15%, 35% { transform: rotate(-20deg); } 25%, 45% { transform: rotate(0deg); } }
+    </style>
+    <!-- Handle Bottom Left, Blade Top Right -->
+    <g class="bot-blade">
+        <circle cx="28" cy="72" r="14" />
+        <line x1="38" y1="62" x2="85" y2="15" />
+    </g>
+    <!-- Handle Top Left, Blade Bottom Right -->
+    <g class="top-blade">
+        <circle cx="28" cy="28" r="14" />
+        <line x1="38" y1="38" x2="85" y2="85" />
+    </g>
+    <circle cx="50" cy="50" r="4" fill="#d4af37" stroke="none" />
+</svg>
