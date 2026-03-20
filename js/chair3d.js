@@ -509,15 +509,18 @@
         });
     };
 
+    let lastProgress = 0;
+
     window.updateScroll = function(progress) {
         if (!chairGroup) return;
         
-        // Progresso vai de 0 a 1 conforme o usuário dá scroll
-        // Rotaciona a cadeira em torno do eixo Y
-        chairGroup.rotation.y = -Math.PI / 4 + (progress * Math.PI * 1.5);
+        const deltaProgress = progress - lastProgress;
+        lastProgress = progress;
         
-        // Efeito de Parallax: Mover a cadeira levemente para baixo
-        // Removido a pedido: a cadeira ficará na mesma altura para que o zoom aproxime melhor
+        // Soma a aceleração do scroll na rotação atual da cadeira independentemente de on/de ela está
+        chairGroup.rotation.y += (deltaProgress * Math.PI * 1.5);
+        
+        // A cadeira ficará na mesma altura para que o zoom aproxime melhor
         chairGroup.position.y = 0;
         
         // Zoom-in (Aproximação) infinito conforme scroll, para "atravessar" a cadeira
