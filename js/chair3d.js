@@ -54,10 +54,10 @@
 
         // Materiais
         const blackLeatherMat = new THREE.MeshStandardMaterial({ 
-            color: 0x1a1a1a, 
-            roughness: 0.8, // Aspecto menos metálico e mais rugoso para couros
+            color: 0xf8f8f8, // off white
+            roughness: 0.8,
             metalness: 0.1,
-            bumpMap: leatherTex, // Dá a textura em poeira processual ao iluminar
+            bumpMap: leatherTex,
             bumpScale: 0.005
         });
         
