@@ -245,39 +245,42 @@
             return radSq > 0 ? 0.15 * Math.sqrt(radSq) : 0;
         }
         
-        // Adicionar costuras (seguindo o volume curvo)
-        for (let i = 0; i < buttons.length; i++) {
-            for (let k = i + 1; k < buttons.length; k++) {
-                const b1 = buttons[i];
-                const b2 = buttons[k];
-                const dx = b2.x - b1.x;
-                const dz = b2.z - b1.z;
-                const dist = Math.sqrt(dx*dx + dz*dz);
-                
-                if (dist > 0.1 && dist < 0.32) { // Distância da malha ligando losangos
-                    const midX = (b1.x + b2.x)/2;
-                    const midZ = (b1.z + b2.z)/2;
-                    // Traz para a superfície da almofada curva, levemente afundada para dentro (-0.003)
-                    const surfaceY = 0.1 + getCushionElevation(midX, midZ);
+        // Adicionar costuras e botões (Aplicado tanto na frente: side=1, quanto atrás: side=-1)
+        [1, -1].forEach(side => {
+            // Adicionar costuras (seguindo o volume curvo)
+            for (let i = 0; i < buttons.length; i++) {
+                for (let k = i + 1; k < buttons.length; k++) {
+                    const b1 = buttons[i];
+                    const b2 = buttons[k];
+                    const dx = b2.x - b1.x;
+                    const dz = b2.z - b1.z;
+                    const dist = Math.sqrt(dx*dx + dz*dz);
                     
-                    const seamLine = new THREE.BoxGeometry(dist, 0.005, 0.005);
-                    const seamMesh = new THREE.Mesh(seamLine, creaseMat);
-                    seamMesh.position.set(midX, surfaceY - 0.003, midZ);
-                    seamMesh.rotation.y = -Math.atan2(dz, dx);
-                    
-                    backMesh.add(seamMesh);
+                    if (dist > 0.1 && dist < 0.32) { // Distância da malha ligando losangos
+                        const midX = (b1.x + b2.x)/2;
+                        const midZ = (b1.z + b2.z)/2;
+                        // Traz para a superfície da almofada curva, levemente afundada para dentro (-0.003)
+                        const surfaceY = (0.1 + getCushionElevation(midX, midZ)) * side;
+                        
+                        const seamLine = new THREE.BoxGeometry(dist, 0.005, 0.005);
+                        const seamMesh = new THREE.Mesh(seamLine, creaseMat);
+                        seamMesh.position.set(midX, surfaceY - (0.003 * side), midZ);
+                        seamMesh.rotation.y = -Math.atan2(dz, dx);
+                        
+                        backMesh.add(seamMesh);
+                    }
                 }
             }
-        }
 
-        // Adicionar os botões achatados ao volume
-        buttons.forEach(btnInfo => {
-            const surfaceY = 0.1 + getCushionElevation(btnInfo.x, btnInfo.z);
-            const btn = new THREE.Mesh(btnGeo, chromeMat);
-            btn.position.set(btnInfo.x, surfaceY + 0.002, btnInfo.z); 
-            // Achatando no eixo Y
-            btn.scale.set(1.0, 0.2, 1.0 / (1.5 / 1.6)); 
-            backMesh.add(btn);
+            // Adicionar os botões achatados ao volume
+            buttons.forEach(btnInfo => {
+                const surfaceY = (0.1 + getCushionElevation(btnInfo.x, btnInfo.z)) * side;
+                const btn = new THREE.Mesh(btnGeo, chromeMat);
+                btn.position.set(btnInfo.x, surfaceY + (0.002 * side), btnInfo.z); 
+                // Achatando no eixo Y
+                btn.scale.set(1.0, 0.2, 1.0 / (1.5 / 1.6)); 
+                backMesh.add(btn);
+            });
         });
 
         // Apoio de Cabeça (Cilindro com esferas nas pontas)
@@ -323,16 +326,43 @@
         const armGeo = new THREE.CylinderGeometry(0.1, 0.1, 1.0, 32);
         const armCapGeo = new THREE.SphereGeometry(0.1, 32, 16);
         
+        // Função para desenhar a costura de matelassê/capitonê no topo do braço
+        function addArmrestSeams(armMesh) {
+            const lineGeo = new THREE.BoxGeometry(0.25, 0.005, 0.005); // Menor para caber na largura
+            // Adicional de costuras retas laterais (bordas)
+            const edgeSeamGeo = new THREE.BoxGeometry(0.005, 1.0, 0.005);
+            const edgeSeamL = new THREE.Mesh(edgeSeamGeo, creaseMat);
+            edgeSeamL.position.set(-0.06, 0, 0.098);
+            armMesh.add(edgeSeamL);
+            const edgeSeamR = new THREE.Mesh(edgeSeamGeo, creaseMat);
+            edgeSeamR.position.set(0.06, 0, 0.098);
+            armMesh.add(edgeSeamR);
+
+            // Costuras cruzadas no centro imitando couro costurado em losangos
+            for (let y = -0.4; y <= 0.41; y += 0.2) {
+                const seam1 = new THREE.Mesh(lineGeo, creaseMat);
+                seam1.position.set(0, y, 0.098); // Local Z vira topo Y na tela (Z=0.1)
+                seam1.rotation.z = Math.PI / 4;
+                armMesh.add(seam1);
+
+                const seam2 = new THREE.Mesh(lineGeo, creaseMat);
+                seam2.position.set(0, y, 0.098);
+                seam2.rotation.z = -Math.PI / 4;
+                armMesh.add(seam2);
+            }
+        }
+        
         const armL = new THREE.Mesh(armGeo, blackLeatherMat);
         armL.rotation.x = Math.PI / 2; // Alinha com o eixo Z
         armL.position.set(-0.9, 0.2, -0.1);
-        armL.scale.set(1.0, 1.0, 0.5); // Achatado na altura
+        armL.scale.set(1.0, 1.0, 0.5); // Achatado na altura e em formato de pad
         const armLCap1 = new THREE.Mesh(armCapGeo, blackLeatherMat);
         armLCap1.position.y = 0.5;
         armL.add(armLCap1);
         const armLCap2 = new THREE.Mesh(armCapGeo, blackLeatherMat);
         armLCap2.position.y = -0.5;
         armL.add(armLCap2);
+        addArmrestSeams(armL);
         chairGroup.add(armL);
         
         const armR = new THREE.Mesh(armGeo, blackLeatherMat);
@@ -345,25 +375,56 @@
         const armRCap2 = new THREE.Mesh(armCapGeo, blackLeatherMat);
         armRCap2.position.y = -0.5;
         armR.add(armRCap2);
+        addArmrestSeams(armR);
         chairGroup.add(armR);
 
-        // Suportes dos Braços
-        const armSupportGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.5, 16);
+        // Suportes dos Braços (Estrutura Usinada Dinâmica que respeita a superfície do banco)
+        const supportRingGeo = new THREE.TorusGeometry(0.04, 0.015, 16, 32);
+        const baseFlangeGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.04, 32);
+
+        function createMachinedSupport(x, z) {
+            const group = new THREE.Group();
+            
+            // Calculando a altura perfeita baseada na curvatura do assento
+            const topY = 0.15; // Altura onde encaixa no braço
+            const radSq = 1.0 - (x*x) - (z*z); // O assento tem raio 1.0
+            const elevation = radSq > 0 ? 0.15 * Math.sqrt(radSq) : 0;
+            // O assento de base fica em Y global -0.25, e o topo do cilindro é local +0.1, então a base do estofamento é -0.15 global
+            const bottomY = -0.15 + elevation - 0.01; // O -0.01 é para que a flange afunde levemente no couro, em vez de pairar
+            
+            const height = topY - bottomY;
+            const centerY = (topY + bottomY) / 2;
+            
+            group.position.set(x, centerY, z);
+            
+            const poleGeo = new THREE.CylinderGeometry(0.03, 0.03, height, 16);
+            const pole = new THREE.Mesh(poleGeo, goldMat);
+            group.add(pole);
+            
+            // Anel superior cromado
+            const ringTop = new THREE.Mesh(supportRingGeo, chromeMat);
+            ringTop.rotation.x = Math.PI / 2;
+            ringTop.position.y = height / 2 - 0.03;
+            group.add(ringTop);
+            
+            // Flange robusta limitadora (finaliza no banco)
+            const baseFlange = new THREE.Mesh(baseFlangeGeo, goldMat);
+            baseFlange.position.y = -height / 2 + 0.01;
+            group.add(baseFlange);
+
+            return group;
+        }
         
-        const supportL1 = new THREE.Mesh(armSupportGeo, goldMat);
-        supportL1.position.set(-0.9, -0.1, 0.2);
+        const supportL1 = createMachinedSupport(-0.9, 0.2);
         chairGroup.add(supportL1);
         
-        const supportL2 = new THREE.Mesh(armSupportGeo, goldMat);
-        supportL2.position.set(-0.9, -0.1, -0.4);
+        const supportL2 = createMachinedSupport(-0.9, -0.4);
         chairGroup.add(supportL2);
 
-        const supportR1 = new THREE.Mesh(armSupportGeo, goldMat);
-        supportR1.position.set(0.9, -0.1, 0.2);
+        const supportR1 = createMachinedSupport(0.9, 0.2);
         chairGroup.add(supportR1);
         
-        const supportR2 = new THREE.Mesh(armSupportGeo, goldMat);
-        supportR2.position.set(0.9, -0.1, -0.4);
+        const supportR2 = createMachinedSupport(0.9, -0.4);
         chairGroup.add(supportR2);
 
         // Apoio de Pés (mantendo o posicionamento, com hastes e bordas arredondadas)
