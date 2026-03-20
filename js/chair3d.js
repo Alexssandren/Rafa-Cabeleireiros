@@ -123,18 +123,59 @@
         backGroup.add(backMesh);
         chairGroup.add(backGroup);
 
-        // Detalhes do encosto: botões (Capitonê)
-        const btnGeo = new THREE.SphereGeometry(0.04, 16, 16);
-        for(let j = -0.4; j <= 0.4; j += 0.4) {
-            const steps = (Math.abs(j) < 0.1) ? [-0.4, 0, 0.4] : [-0.2, 0.2];
-            steps.forEach(i => {
-                const btn = new THREE.Mesh(btnGeo, chromeMat);
-                // i = X local, 0.1 = superfície em Y (grossura), -j = compensa rotação X
-                btn.position.set(i, 0.1, -j / (1.5 / 1.6)); 
-                btn.scale.set(1.0, 2.0, 1.0 / (1.5 / 1.6)); // Restaurar forma esférica visual
-                backMesh.add(btn);
-            });
+        // Detalhes do encosto: botões (Capitonê) e costuras
+        const creaseMat = new THREE.MeshStandardMaterial({ 
+            color: 0x080808, // Preto profundo para a costura
+            roughness: 0.9,
+            metalness: 0.0
+        });
+
+        const buttons = [];
+        const rowData = [
+            { j: -0.6, xs: [ -0.2, 0.2 ] },
+            { j: -0.4, xs: [ -0.4, 0, 0.4 ] },
+            { j: -0.2, xs: [ -0.6, -0.2, 0.2, 0.6 ] },
+            { j: 0.0, xs: [ -0.4, 0, 0.4 ] },
+            { j: 0.2, xs: [ -0.6, -0.2, 0.2, 0.6 ] },
+            { j: 0.4, xs: [ -0.4, 0, 0.4 ] },
+            { j: 0.6, xs: [ -0.2, 0.2 ] }
+        ];
+
+        rowData.forEach(row => {
+             row.xs.forEach(x => {
+                 buttons.push({ x: x, z: -row.j / (1.5 / 1.6) });
+             });
+        });
+
+        const btnGeo = new THREE.SphereGeometry(0.03, 16, 16);
+        
+        // Adicionar costuras (linhas de profundidade do capitonê)
+        for (let i = 0; i < buttons.length; i++) {
+            for (let k = i + 1; k < buttons.length; k++) {
+                const b1 = buttons[i];
+                const b2 = buttons[k];
+                const dx = b2.x - b1.x;
+                const dz = b2.z - b1.z;
+                const dist = Math.sqrt(dx*dx + dz*dz);
+                
+                if (dist > 0.1 && dist < 0.32) { // Distância da malha para ligar os losangos
+                    const seamLine = new THREE.BoxGeometry(dist, 0.005, 0.005);
+                    const seamMesh = new THREE.Mesh(seamLine, creaseMat);
+                    seamMesh.position.set((b1.x + b2.x)/2, 0.101, (b1.z + b2.z)/2); // Afundado
+                    seamMesh.rotation.y = -Math.atan2(dz, dx);
+                    backMesh.add(seamMesh);
+                }
+            }
         }
+
+        // Adicionar os botões achatados
+        buttons.forEach(btnInfo => {
+            const btn = new THREE.Mesh(btnGeo, chromeMat);
+            btn.position.set(btnInfo.x, 0.103, btnInfo.z); 
+            // Achatando no eixo Y (que aponta para fora na superfície)
+            btn.scale.set(1.0, 0.2, 1.0 / (1.5 / 1.6)); 
+            backMesh.add(btn);
+        });
 
         // Apoio de Cabeça (Cilindro com esferas nas pontas)
         const headrestGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.3, 32);
@@ -312,11 +353,12 @@
         chairGroup.rotation.y = -Math.PI / 4 + (progress * Math.PI * 1.5);
         
         // Efeito de Parallax: Mover a cadeira levemente para baixo
-        chairGroup.position.y = -(progress * 2);
+        // Removido a pedido: a cadeira ficará na mesma altura para que o zoom aproxime melhor
+        chairGroup.position.y = 0;
         
-        // Zoom-in (Aproximação) conforme scroll
+        // Zoom-in (Aproximação) infinito conforme scroll, para "atravessar" a cadeira
         if (camera) {
-            camera.position.z = 8 - (progress * 4.5); // Aproxima a câmera da cadeira
+            camera.position.z = 8 - (progress * 12); // Posição de Z termina em -4 (atrás e além da cadeira)
         }
     };
 
