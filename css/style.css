@@ -239,6 +239,35 @@ ul {
     font-weight: 300;
 }
 
+/* Scroll Indicator */
+.scroll-indicator-wrapper {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 10;
+}
+
+.scroll-indicator {
+    display: inline-block;
+    font-size: 2rem;
+    color: var(--text-main);
+    opacity: 0.6; /* levemente opaca */
+    animation: bounce-scroll 2s infinite ease-in-out;
+    transition: opacity 0.3s;
+}
+
+.scroll-indicator:hover {
+    opacity: 1;
+    color: var(--gold);
+}
+
+@keyframes bounce-scroll {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(15px); }
+}
+
 .btn-primary {
     display: inline-flex;
     align-items: center;
