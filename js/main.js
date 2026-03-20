@@ -77,7 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('scroll', function() {
             if (!ticking) {
                 window.requestAnimationFrame(function() {
-                    var progress = Math.min(window.scrollY / (window.innerHeight * 1.5), 1);
+                    // Sincroniza o término do zoom (progress = 1) para ser mais precoce
+                    var progress = Math.min(window.scrollY / (window.innerHeight * 0.8), 1);
                     if (typeof window.updateScroll === 'function') window.updateScroll(progress);
                     ticking = false;
                 });

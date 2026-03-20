@@ -178,7 +178,7 @@ ul {
 
 /* Hero Section */
 .hero {
-    height: 250vh; /* Tempo total de scroll da animação */
+    height: 120vh; /* Reduzido para amarrar o fim do zoom com a subida do texto */
     position: relative;
     background: radial-gradient(circle at center, #2a2a2a 0%, #121212 100%);
     margin-top: 0;

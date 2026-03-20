@@ -36,11 +36,29 @@
         // Criar Cadeira
         chairGroup = new THREE.Group();
         
+        // Textura processual para simular couro (Bump Map)
+        const leatherCanvas = document.createElement('canvas');
+        leatherCanvas.width = 512;
+        leatherCanvas.height = 512;
+        const ctx = leatherCanvas.getContext('2d');
+        ctx.fillStyle = '#808080'; // cinza neutro base
+        ctx.fillRect(0, 0, 512, 512);
+        for(let i=0; i<60000; i++) {
+            ctx.fillStyle = Math.random() > 0.5 ? '#999999' : '#666666';
+            ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
+        }
+        const leatherTex = new THREE.CanvasTexture(leatherCanvas);
+        leatherTex.wrapS = THREE.RepeatWrapping;
+        leatherTex.wrapT = THREE.RepeatWrapping;
+        leatherTex.repeat.set(4, 4);
+
         // Materiais
         const blackLeatherMat = new THREE.MeshStandardMaterial({ 
             color: 0x1a1a1a, 
-            roughness: 0.6,
-            metalness: 0.1
+            roughness: 0.8, // Aspecto menos metálico e mais rugoso para couros
+            metalness: 0.1,
+            bumpMap: leatherTex, // Dá a textura em poeira processual ao iluminar
+            bumpScale: 0.005
         });
         
         const goldMat = new THREE.MeshStandardMaterial({
@@ -54,6 +72,14 @@
             roughness: 0.2,
             metalness: 0.9
         });
+
+        // Detalhes comuns de estofado (costuras e botões)
+        const creaseMat = new THREE.MeshStandardMaterial({ 
+            color: 0x080808, 
+            roughness: 0.9,
+            metalness: 0.0
+        });
+        const btnGeo = new THREE.SphereGeometry(0.03, 16, 16);
 
         // Base (Cilindro com detalhe de borda)
         const baseGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.1, 64);
@@ -95,6 +121,63 @@
         seatRimBottom.position.y = -0.1;
         seatMesh.add(seatRimBottom);
 
+        // Cúpula superior para simular estofado volumoso no assento
+        const seatCushionGeo = new THREE.SphereGeometry(1.0, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+        const seatCushionTop = new THREE.Mesh(seatCushionGeo, blackLeatherMat);
+        seatCushionTop.position.y = 0.1; // Senta na face superior do cilindro (Y local)
+        seatCushionTop.scale.set(1.0, 0.15, 1.0); // Dá um volume inflado (0.15 de altura no topo)
+        seatMesh.add(seatCushionTop);
+
+        // -- Capitonê do Assento --
+        function getSeatCushionElevation(x, z) {
+            const radSq = 1.0 - (x*x) - (z*z); // Raio 1.0
+            return radSq > 0 ? 0.15 * Math.sqrt(radSq) : 0;
+        }
+
+        const seatButtons = [];
+        for (let i = -4; i <= 4; i++) {
+            for (let k = -4; k <= 4; k++) {
+                if (Math.abs(i % 2) === Math.abs(k % 2)) {
+                    const x = i * 0.2;
+                    const z = k * 0.2;
+                    if (Math.sqrt(x*x + z*z) < 0.85) { // Evita a borda curva onde afunda muito
+                        seatButtons.push({ x: x, z: z });
+                    }
+                }
+            }
+        }
+
+        for (let i = 0; i < seatButtons.length; i++) {
+            for (let k = i + 1; k < seatButtons.length; k++) {
+                const b1 = seatButtons[i];
+                const b2 = seatButtons[k];
+                const dx = b2.x - b1.x;
+                const dz = b2.z - b1.z;
+                const dist = Math.sqrt(dx*dx + dz*dz);
+                
+                if (dist > 0.1 && dist < 0.32) {
+                    const midX = (b1.x + b2.x)/2;
+                    const midZ = (b1.z + b2.z)/2;
+                    const surfaceY = 0.1 + getSeatCushionElevation(midX, midZ);
+                    
+                    const seamLine = new THREE.BoxGeometry(dist, 0.005, 0.005);
+                    const seamMesh = new THREE.Mesh(seamLine, creaseMat);
+                    seamMesh.position.set(midX, surfaceY - 0.003, midZ);
+                    seamMesh.rotation.y = -Math.atan2(dz, dx);
+                    seatMesh.add(seamMesh);
+                }
+            }
+        }
+
+        seatButtons.forEach(btnInfo => {
+            const surfaceY = 0.1 + getSeatCushionElevation(btnInfo.x, btnInfo.z);
+            const btn = new THREE.Mesh(btnGeo, chromeMat);
+            btn.position.set(btnInfo.x, surfaceY + 0.002, btnInfo.z); 
+            btn.scale.set(1.0, 0.2, 1.0); // O assento não é achatado no scale do grupo, então apenas Y é 0.2
+            seatMesh.add(btn);
+        });
+        // -- Fim do Capitonê no Assento --
+
         chairGroup.add(seatMesh);
 
         // Encosto (Disco com bordas arredondadas tipo almofada)
@@ -118,18 +201,27 @@
         
         // Aponta a face circular para frente/trás (rotacionando X em 90 graus)
         backMesh.rotation.x = Math.PI / 2; 
-        // Achata a altura do disco para ter 1.5 em vez de 1.6 (o Y local é a grossura (0.2), Z local (1.6 de diâmetro) vira o Y vertical após rotação)
+        // Achata a altura do disco para ter 1.5 em vez de 1.6
         backMesh.scale.set(1.0, 1.0, 1.5 / 1.6); 
+
+        // Adiciona almofadas em cúpula na frente e atrás para simular profundidade e enchimento
+        const backCushionGeo = new THREE.SphereGeometry(0.8, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+        
+        const frontCushion = new THREE.Mesh(backCushionGeo, blackLeatherMat);
+        frontCushion.position.y = 0.1; // Fica na face frontal (+Y no espaço do disco)
+        frontCushion.scale.set(1.0, 0.15, 1.0); // Achata para formar uma almofada redonda
+        backMesh.add(frontCushion);
+
+        const backCushion = new THREE.Mesh(backCushionGeo, blackLeatherMat);
+        backCushion.rotation.x = Math.PI; // Inverte para apontar para a face traseira
+        backCushion.position.y = -0.1;
+        backCushion.scale.set(1.0, 0.15, 1.0);
+        backMesh.add(backCushion);
+
         backGroup.add(backMesh);
         chairGroup.add(backGroup);
 
         // Detalhes do encosto: botões (Capitonê) e costuras
-        const creaseMat = new THREE.MeshStandardMaterial({ 
-            color: 0x080808, // Preto profundo para a costura
-            roughness: 0.9,
-            metalness: 0.0
-        });
-
         const buttons = [];
         const rowData = [
             { j: -0.6, xs: [ -0.2, 0.2 ] },
@@ -146,10 +238,14 @@
                  buttons.push({ x: x, z: -row.j / (1.5 / 1.6) });
              });
         });
-
-        const btnGeo = new THREE.SphereGeometry(0.03, 16, 16);
         
-        // Adicionar costuras (linhas de profundidade do capitonê)
+        // Função auxiliar para calcular a altura da curva estofada num dado ponto (X, Z) local da placa
+        function getCushionElevation(x, z) {
+            const radSq = 0.64 - (x*x) - (z*z); // Raio 0.8
+            return radSq > 0 ? 0.15 * Math.sqrt(radSq) : 0;
+        }
+        
+        // Adicionar costuras (seguindo o volume curvo)
         for (let i = 0; i < buttons.length; i++) {
             for (let k = i + 1; k < buttons.length; k++) {
                 const b1 = buttons[i];
@@ -158,21 +254,28 @@
                 const dz = b2.z - b1.z;
                 const dist = Math.sqrt(dx*dx + dz*dz);
                 
-                if (dist > 0.1 && dist < 0.32) { // Distância da malha para ligar os losangos
+                if (dist > 0.1 && dist < 0.32) { // Distância da malha ligando losangos
+                    const midX = (b1.x + b2.x)/2;
+                    const midZ = (b1.z + b2.z)/2;
+                    // Traz para a superfície da almofada curva, levemente afundada para dentro (-0.003)
+                    const surfaceY = 0.1 + getCushionElevation(midX, midZ);
+                    
                     const seamLine = new THREE.BoxGeometry(dist, 0.005, 0.005);
                     const seamMesh = new THREE.Mesh(seamLine, creaseMat);
-                    seamMesh.position.set((b1.x + b2.x)/2, 0.101, (b1.z + b2.z)/2); // Afundado
+                    seamMesh.position.set(midX, surfaceY - 0.003, midZ);
                     seamMesh.rotation.y = -Math.atan2(dz, dx);
+                    
                     backMesh.add(seamMesh);
                 }
             }
         }
 
-        // Adicionar os botões achatados
+        // Adicionar os botões achatados ao volume
         buttons.forEach(btnInfo => {
+            const surfaceY = 0.1 + getCushionElevation(btnInfo.x, btnInfo.z);
             const btn = new THREE.Mesh(btnGeo, chromeMat);
-            btn.position.set(btnInfo.x, 0.103, btnInfo.z); 
-            // Achatando no eixo Y (que aponta para fora na superfície)
+            btn.position.set(btnInfo.x, surfaceY + 0.002, btnInfo.z); 
+            // Achatando no eixo Y
             btn.scale.set(1.0, 0.2, 1.0 / (1.5 / 1.6)); 
             backMesh.add(btn);
         });
