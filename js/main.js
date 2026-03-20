@@ -67,42 +67,24 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(typeWriter, 800);
     }
 
-    // Carregar Cadeira SVG
-    fetch('cadeira.html')
-        .then(response => response.text())
-        .then(html => {
-            const container = document.getElementById('chair-container');
-            if(container) container.innerHTML = html;
-        });
+    // Inicializar Three.js Barber Chair 3D
+    var chairContainer = document.getElementById('chair-container');
+    if (chairContainer && typeof window.initChair === 'function') {
+        window.initChair(chairContainer);
 
-    // Animação de Scroll Otimizada para a Cadeira
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                const chair = document.getElementById('barber-chair');
-                if (chair) {
-                    let scrollY = window.scrollY;
-                    let progress = Math.min(scrollY / (window.innerHeight * 1.5), 1);
-                    
-                    let scale = 1 + (progress * 6); 
-                    let rotate = progress * 90; 
-                    let translateY = progress * 150; 
-                    
-                    // translateZ(0) força a aceleração de hardware (GPU)
-                    chair.style.transform = `scale(${scale}) rotate(${rotate}deg) translateY(${translateY}px) translateZ(0)`;
-                    
-                    if (progress > 0.85) {
-                        chair.style.opacity = 1 - ((progress - 0.85) * 6.66);
-                    } else {
-                        chair.style.opacity = 1;
-                    }
-                }
-                ticking = false;
-            });
-            ticking = true;
-        }
-    }, { passive: true });
+        // Sincronizar rotação e câmera com o scroll
+        var ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    var progress = Math.min(window.scrollY / (window.innerHeight * 1.5), 1);
+                    if (typeof window.updateScroll === 'function') window.updateScroll(progress);
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    }
 
     // Instanciando Flatpickr para Data (Calendário) e Horário (Relógio)
     if (typeof flatpickr !== 'undefined') {

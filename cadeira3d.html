@@ -1,0 +1,204 @@
+<style>
+  /* Cadeira 3D Premium Geometrizada em CSS */
+  .c3d-scene {
+      width: 100%; height: 100%;
+      display: flex; justify-content: center; align-items: center;
+      perspective: 1500px;
+  }
+  
+  .c3d-wrapper { 
+      transform-style: preserve-3d; 
+      position: relative; 
+      width: 100px; height: 100px; 
+      transform: rotateX(-12deg) translateY(50px); 
+      will-change: transform;
+  }
+  
+  .c3d-part { 
+      position: absolute; 
+      transform-style: preserve-3d; 
+  }
+  
+  .c3d-face { 
+      position: absolute; 
+      display: flex; align-items: center; justify-content: center; 
+  }
+
+  /* BASE (Cilindro Metálico Duplo) */
+  .c3d-base {
+     width: 180px; height: 180px; border-radius: 50%;
+     background: radial-gradient(circle, #333 30%, #050505 100%);
+     border: 4px solid var(--gold);
+     transform: rotateX(90deg) translateZ(-80px) translateX(-40px) translateY(-40px);
+     box-shadow: 
+         0 1px 0 #b38e21, 0 2px 0 #b38e21, 0 3px 0 #b38e21, /* Detalhe ouro superior */
+         0 4px 0 #222, 0 5px 0 #222, 0 6px 0 #111, 0 7px 0 #111, 0 8px 0 #111,
+         0 9px 0 #111, 0 10px 0 #000, 0 11px 0 #000, 0 12px 0 #000,
+         0 25px 45px rgba(0,0,0,0.9);
+  }
+
+  /* PILAR (Eixo Hidráulico Texturizado) */
+  .c3d-pole {
+     width: 46px; height: 46px; border-radius: 50%;
+     background: radial-gradient(circle at 30% 30%, #ffd700, #b38e21, #4a3800);
+     transform: rotateX(90deg) translateZ(-20px) translateX(27px) translateY(27px);
+     box-shadow: 
+        0 2px 0 #b38e21, 0 4px 0 #9c7c19, 0 6px 0 #7a5f00, 0 8px 0 #b38e21,
+        0 10px 0 #9c7c19, 0 12px 0 #7a5f00, 0 14px 0 #b38e21, 0 16px 0 #9c7c19,
+        0 18px 0 #7a5f00, 0 20px 0 #b38e21, 0 22px 0 #9c7c19, 0 24px 0 #7a5f00,
+        0 26px 0 #b38e21, 0 28px 0 #9c7c19, 0 30px 0 #7a5f00, 0 32px 0 #b38e21,
+        0 34px 0 #9c7c19, 0 36px 0 #7a5f00, 0 38px 0 #b38e21, 0 40px 0 #9c7c19,
+        0 42px 0 #7a5f00, 0 44px 0 #b38e21, 0 46px 0 #9c7c19, 0 48px 0 #7a5f00,
+        0 50px 0 #b38e21, 0 52px 0 #9c7c19, 0 54px 0 #7a5f00, 0 56px 0 #b38e21,
+        0 58px 0 #9c7c19, 0 60px 0 #7a5f00; 
+  }
+
+  /* ASSENTO (Redondo/Cilindro de Couro) - Muito mais premium que um cubo! */
+  .c3d-seat-cushion {
+     width: 130px; height: 140px; border-radius: 50%;
+     background: radial-gradient(circle at 30% 30%, #3a3a3a, #1a1a1a, #000);
+     border: 2px solid #222;
+     transform: rotateX(90deg) translateZ(15px) translateX(-15px) translateY(-20px);
+     /* 20 layers de box shadow formam um cilindro espesso de couro para o assento */
+     box-shadow: 
+        0 1px 0 #1a1a1a, 0 2px 0 #1a1a1a, 0 3px 0 #111, 0 4px 0 #111,
+        0 5px 0 #111, 0 6px 0 #0a0a0a, 0 7px 0 #0a0a0a, 0 8px 0 #0a0a0a,
+        0 9px 0 #050505, 0 10px 0 #050505, 0 11px 0 #000, 0 12px 0 #000,
+        0 13px 0 #000, 0 14px 0 #000, 0 15px 0 #000, 0 16px 0 #000,
+        0 17px 0 #000, 0 18px 0 #000, 0 19px 0 #000, 0 20px 0 #000,
+        0 30px 30px rgba(0,0,0,0.8) inset;
+  }
+
+  /* ENCOSTO COSTAS (Cubo com bordas super arredondadas e Textura interna Capitonê) */
+  .c3d-backrest { transform: translateX(-10px) translateY(-90px) translateZ(-40px); }
+  .c3d-backrest .front  { width: 120px; height: 130px; transform: rotateY(0deg) translateZ(15px); background: #1a1a1a; 
+                          border-radius: 30px 30px 10px 10px; box-shadow: inset 0 0 30px #000;
+                          /* Textura de couro em losango capitonê feita puramente via CSS Radial Gradients! */
+                          background-image: 
+                            radial-gradient(circle at 40px 40px, #000 2px, transparent 4px),
+                            radial-gradient(circle at 80px 40px, #000 2px, transparent 4px),
+                            radial-gradient(circle at 60px 80px, #000 2px, transparent 4px),
+                            radial-gradient(circle at 40px 120px, #000 2px, transparent 4px),
+                            radial-gradient(circle at 80px 120px, #000 2px, transparent 4px),
+                            linear-gradient(45deg, transparent 48%, rgba(0,0,0,0.3) 49%, transparent 51%),
+                            linear-gradient(-45deg, transparent 48%, rgba(0,0,0,0.3) 49%, transparent 51%);
+                        }
+  .c3d-backrest .back   { width: 120px; height: 130px; transform: rotateY(180deg) translateZ(15px); background: linear-gradient(#222, #050505); border-radius: 30px 30px 10px 10px; border: 2px solid var(--gold); border-bottom: none;}
+  .c3d-backrest .left   { width: 30px; height: 120px; transform: rotateY(-90deg) translateZ(60px); background: linear-gradient(#222, #000); border-radius: 15px;}
+  .c3d-backrest .right  { width: 30px; height: 120px; transform: rotateY(90deg) translateZ(60px); background: linear-gradient(#222, #000); border-radius: 15px;}
+  .c3d-backrest .top    { width: 100px; height: 30px; transform: rotateX(90deg) translateZ(60px) translateY(5px); background: #222; border-radius: 15px;}
+  .c3d-backrest .bottom { width: 100px; height: 30px; transform: rotateX(-90deg) translateZ(70px) translateY(-5px); background: #000; border-radius: 15px;}
+
+  /* ESTRUTURA METÁLICA TRASEIRA (Apoio Dourado Central) */
+  .c3d-back-support {
+     width: 14px; height: 80px; border-radius: 5px; background: var(--gold);
+     transform: rotateX(15deg) translateZ(-65px) translateX(43px) translateY(-30px);
+     box-shadow: 0 0 10px #7a5f00 inset;
+  }
+
+  /* APOIO DE CABEÇA (Cilindro Horizontal no topo do encosto) */
+  .c3d-headrest {
+     width: 80px; height: 35px; border-radius: 20px;
+     background: linear-gradient(to bottom, #333, #0a0a0a);
+     transform: translateZ(-25px) translateX(10px) translateY(-125px);
+     box-shadow: 0 2px 0 #111, 0 4px 0 #111, 0 6px 0 #000, 0 8px 0 #000, 0 10px 0 #000, inset 0 5px 10px rgba(0,0,0,0.8);
+  }
+  .c3d-headrest-rod {
+     width: 16px; height: 30px; background: silver;
+     transform: translateZ(-25px) translateX(42px) translateY(-100px);
+     box-shadow: inset 0 0 5px #333;
+     border-radius: 3px;
+  }
+
+  /* APOIO PARA PÉS SUPER DETALHADO */
+  /* Placa angular base */
+  .c3d-foot { transform: translateX(10px) translateY(60px) translateZ(65px) rotateX(-20deg); }
+  .c3d-foot .top { width: 80px; height: 50px; transform: rotateX(90deg) translateZ(2.5px); 
+                   /* Placa de borracha em frisos de alta aderência */
+                   background: repeating-linear-gradient(to bottom, #111, #111 6px, #000 6px, #000 8px); 
+                   border: 2px solid var(--gold); border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+  .c3d-foot .front { width: 80px; height: 5px; transform: rotateY(0deg) translateZ(25px); background: #b38e21; border-radius: 2px;}
+  .c3d-foot .back { width: 80px; height: 5px; transform: rotateY(180deg) translateZ(25px); background: #7a5f00; border-radius: 2px;}
+
+  /* Pedal Footrest - Barra de Metal Cromada Redonda */
+  .c3d-foot-bar {
+      width: 100px; height: 12px; border-radius: 6px; background: linear-gradient(to bottom, #fff, silver, #333);
+      transform: translateX(0px) translateY(100px) translateZ(90px);
+      box-shadow: inset 0 -3px 5px #333, 0 5px 10px rgba(0,0,0,0.8);
+  }
+  /* Hastes que seguram as barras do pé */
+  .c3d-foot-rod-l { width: 10px; height: 50px; background: linear-gradient(to right, var(--gold), #7a5f00); transform: rotateX(-45deg) translateX(15px) translateY(55px) translateZ(60px); border-radius: 5px; }
+  .c3d-foot-rod-r { width: 10px; height: 50px; background: linear-gradient(to right, #7a5f00, var(--gold)); transform: rotateX(-45deg) translateX(75px) translateY(55px) translateZ(60px); border-radius: 5px; }
+
+  /* BRAÇOS PREMIUM CURVADOS (Dourado nas hastes + Couro Padded no topo) */
+  .c3d-arm-l { transform: translateX(-25px) translateY(-30px) translateZ(10px); }
+  .c3d-arm-l .front { width: 22px; height: 10px; transform: rotateY(0deg) translateZ(55px); background: #111; border-radius: 10px 10px 0 0;}
+  .c3d-arm-l .back  { width: 22px; height: 10px; transform: rotateY(180deg) translateZ(55px); background: #111; border-radius: 10px 10px 0 0;}
+  .c3d-arm-l .top   { width: 22px; height: 110px; transform: rotateX(90deg) translateZ(5px); background: linear-gradient(to right, #333, #0a0a0a); border-radius: 20px; box-shadow: inset 0 0 5px #000;}
+  .c3d-arm-l-support { width: 14px; height: 60px; background: linear-gradient(var(--gold), #7a5f00); transform: translateX(-21px) translateY(-20px) translateZ(40px); border-radius: 7px; box-shadow: inset 0 0 5px #7a5f00; }
+  .c3d-arm-l-support-b { width: 14px; height: 60px; background: linear-gradient(#7a5f00, var(--gold)); transform: translateX(-21px) translateY(-30px) translateZ(-20px) rotateX(15deg); border-radius: 7px; box-shadow: inset 0 0 5px #7a5f00; }
+
+  .c3d-arm-r { transform: translateX(103px) translateY(-30px) translateZ(10px); }
+  .c3d-arm-r .front { width: 22px; height: 10px; transform: rotateY(0deg) translateZ(55px); background: #111; border-radius: 10px 10px 0 0;}
+  .c3d-arm-r .back  { width: 22px; height: 10px; transform: rotateY(180deg) translateZ(55px); background: #111; border-radius: 10px 10px 0 0;}
+  .c3d-arm-r .top   { width: 22px; height: 110px; transform: rotateX(90deg) translateZ(5px); background: linear-gradient(to right, #333, #0a0a0a); border-radius: 20px; box-shadow: inset 0 0 5px #000;}
+  .c3d-arm-r-support { width: 14px; height: 60px; background: linear-gradient(var(--gold), #7a5f00); transform: translateX(107px) translateY(-20px) translateZ(40px); border-radius: 7px; box-shadow: inset 0 0 5px #7a5f00; }
+  .c3d-arm-r-support-b { width: 14px; height: 60px; background: linear-gradient(#7a5f00, var(--gold)); transform: translateX(107px) translateY(-30px) translateZ(-20px) rotateX(15deg); border-radius: 7px; box-shadow: inset 0 0 5px #7a5f00; }
+
+</style>
+
+<div class="c3d-scene">
+  <div id="barber-chair" class="c3d-wrapper">
+    
+    <!-- Base e Hidráulico -->
+    <div class="c3d-part c3d-base"></div>
+    <div class="c3d-part c3d-pole"></div>
+    
+    <!-- Apoio de Pés Cromado e Dourado -->
+    <div class="c3d-part c3d-foot-rod-l"></div>
+    <div class="c3d-part c3d-foot-rod-r"></div>
+    <div class="c3d-part c3d-foot-bar"></div>
+    <div class="c3d-part c3d-foot">
+        <div class="c3d-face top"></div>
+        <div class="c3d-face front"></div>
+        <div class="c3d-face back"></div>
+    </div>
+  
+    <!-- Assento Acolchoado Circular de Luxo -->
+    <div class="c3d-part c3d-seat-cushion"></div>
+  
+    <!-- Encosto Capitonê de Costas Côncavas -->
+    <div class="c3d-part c3d-back-support"></div>
+    <div class="c3d-part c3d-backrest">
+        <div class="c3d-face front"></div>
+        <div class="c3d-face back"></div>
+        <div class="c3d-face left"></div>
+        <div class="c3d-face right"></div>
+        <div class="c3d-face top"></div>
+        <div class="c3d-face bottom"></div>
+    </div>
+  
+    <!-- Apoio de Cabeça -->
+    <div class="c3d-part c3d-headrest-rod"></div>
+    <div class="c3d-part c3d-headrest"></div>
+
+    <!-- Braço Esquerdo Clássico -->
+    <div class="c3d-part c3d-arm-l-support"></div>
+    <div class="c3d-part c3d-arm-l-support-b"></div>
+    <div class="c3d-part c3d-arm-l">
+        <div class="c3d-face front"></div>
+        <div class="c3d-face back"></div>
+        <div class="c3d-face top"></div>
+    </div>
+    
+    <!-- Braço Direito Clássico -->
+    <div class="c3d-part c3d-arm-r-support"></div>
+    <div class="c3d-part c3d-arm-r-support-b"></div>
+    <div class="c3d-part c3d-arm-r">
+        <div class="c3d-face front"></div>
+        <div class="c3d-face back"></div>
+        <div class="c3d-face top"></div>
+    </div>
+  
+  </div>
+</div>
