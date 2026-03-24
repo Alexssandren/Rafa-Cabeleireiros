@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 textoWhatsApp += `\n\n*Mensagem adicionais:* ${mensagem}`;
             }
             
-            const numeroWhatsApp = "554896113877"; 
+            const numeroWhatsApp = "5548988472057"; 
             const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(textoWhatsApp)}`;
             
             // Redirecionando e limpando o formulário em seguida
